@@ -1,17 +1,13 @@
+import logging
 import os
 import pathlib
 import sys
 
 import click
-
-from mycraft.lifecycle_providers.host import (
-    MycraftHostProvider,
-)
-from mycraft.lifecycle_providers.executed import (
-    MycraftExecutedProvider,
-)
 from xcraft.providers.lxd import LXDProvider
-import logging
+
+from mycraft.lifecycle_providers.executed import MycraftExecutedProvider
+from mycraft.lifecycle_providers.host import MycraftHostProvider
 
 
 @click.group()
@@ -34,11 +30,11 @@ def main(ctx, debug: bool, shell: bool, provider: str, output: str) -> int:
     output_path = pathlib.Path(output)
 
     if provider == "host":
-        lifecycle_provider = MycraftHostProvider(artifacts_dir=output_path)
+        ctx.obj["provider"] = MycraftHostProvider(artifacts_dir=output_path)
     elif provider == "lxd":
         env_provider = LXDProvider(instance_name="mycraft-project")
         env_provider.setup()
-        lifecycle_provider = MycraftExecutedProvider(
+        ctx.obj["provider"] = MycraftExecutedProvider(
             env_provider=env_provider,
             host_artifacts_dir=output_path,
             host_project_dir=host_project_dir,
@@ -46,8 +42,7 @@ def main(ctx, debug: bool, shell: bool, provider: str, output: str) -> int:
     else:
         raise RuntimeError("unknown provider")
 
-    lifecycle_provider.setup()
-    ctx.obj["provider"] = lifecycle_provider
+    ctx.obj["provider"].setup()
 
     return 0
 
