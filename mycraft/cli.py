@@ -55,9 +55,6 @@ def main(ctx, debug: bool, shell: bool, provider: str, output: str) -> int:
 @main.command("catalog")
 @click.pass_context
 def catalog(ctx) -> int:
-    ctx.obj["MYCRAFT_COMMAND"] = ["catalog"]
-    print(f"cli: {ctx.obj!r}")
-
     ctx.obj["provider"].catalog()
     return 0
 
@@ -66,9 +63,6 @@ def catalog(ctx) -> int:
 @click.argument("parts", nargs=-1, metavar="<part>...", required=False)
 @click.pass_context
 def pull(ctx, parts) -> int:
-    ctx.obj["MYCRAFT_COMMAND"] = ["pull", *parts]
-    print(f"cli: {ctx.obj!r}")
-
     ctx.obj["provider"].pull(parts=parts)
     return 0
 
@@ -76,9 +70,6 @@ def pull(ctx, parts) -> int:
 @main.command("craft")
 @click.pass_context
 def craft(ctx) -> int:
-    ctx.obj["MYCRAFT_COMMAND"] = ["craft"]
-    print(f"cli: {ctx.obj!r}")
-
     crafted = ctx.obj["provider"].craft()
 
     for c in crafted:
@@ -91,9 +82,6 @@ def craft(ctx) -> int:
 @click.argument("parts", nargs=-1, metavar="<part>...", required=False)
 @click.pass_context
 def clean(ctx, parts) -> int:
-    ctx.obj["MYCRAFT_COMMAND"] = ["clean", *parts]
-    print(f"cli: {ctx.obj!r}")
-
     if parts:
         ctx.obj["provider"].clean_parts(parts=parts)
     else:
