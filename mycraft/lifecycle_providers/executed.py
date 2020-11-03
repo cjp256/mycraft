@@ -37,10 +37,12 @@ class MycraftExecutedProvider:
     def _setup_mycraft(self) -> None:
         self._run(["apt", "install", "-y", "git", "python3-pip"], check=True)
         self._run(
-            ["pip3", "install", "git+https://github.com/cjp256/xcraft.git"], check=True
+            ["pip3", "install", "-U", "git+https://github.com/cjp256/xcraft.git"],
+            check=True,
         )
         self._run(
-            ["pip3", "install", "git+https://github.com/cjp256/mycraft.git"], check=True
+            ["pip3", "install", "-U", "git+https://github.com/cjp256/mycraft.git"],
+            check=True,
         )
 
     def setup(self) -> None:
