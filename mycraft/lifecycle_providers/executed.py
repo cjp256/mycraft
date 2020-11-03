@@ -13,11 +13,13 @@ class MycraftExecutedProvider:
         env_provider: ExecutedProvider,
         env_artifacts_dir: pathlib.Path = pathlib.Path("/root/mycraft-artifacts"),
         env_project_dir: pathlib.Path = pathlib.Path("/root/mycraft-project"),
+        host_artifacts_dir: pathlib.Path,
         host_project_dir: pathlib.Path,
     ) -> None:
         self.env_provider = env_provider
         self.env_artifacts_dir = env_artifacts_dir
         self.env_project_dir = env_project_dir
+        self.host_artifacts_dir = host_artifacts_dir
         self.host_project_dir = host_project_dir
 
     def _run(self, command: List[str], **kwargs):
@@ -53,6 +55,7 @@ class MycraftExecutedProvider:
         self.env_provider.executor.sync_to(
             source=self.host_project_dir, destination=self.env_project_dir
         )
+        self._run(["mkdir", "-p", self.env_artifacts_dir.as_posix()], check=True)
 
     def pull(self, *, parts: List[str]) -> None:
         """Run pull phase."""
@@ -71,8 +74,15 @@ class MycraftExecutedProvider:
 
         :returns: Path to snap(s) created from build.
         """
-        self._run(["mycraft", "craft", "--output", self.env_artifacts_dir.as_posix()])
-        return []
+        self._run(["mycraft", "--output", self.env_artifacts_dir.as_posix(), "craft"])
+
+        # Sync artifacts.
+        self.env_provider.executor.sync_from(
+            source=self.env_artifacts_dir,
+            destination=self.host_artifacts_dir,
+        )
+
+        return list(self.host_artifacts_dir.glob("*.zip"))
 
     def clean_parts(self, *, parts: List[str]) -> None:
         """Clean specified parts.

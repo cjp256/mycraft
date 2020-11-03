@@ -26,25 +26,22 @@ import logging
 @click.option("--output", type=str, default=os.path.join(os.getcwd(), "artifacts"))
 @click.pass_context
 def main(ctx, debug: bool, shell: bool, provider: str, output: str) -> int:
-    print("cli: mycraft")
     ctx.ensure_object(dict)
-    ctx.obj["MYCRAFT_DEBUG"] = debug
-    ctx.obj["MYCRAFT_PROVIDER"] = shell
-    ctx.obj["MYCRAFT_SHELL"] = shell
-    print(f"cli: {ctx.obj!r}")
 
     logging.basicConfig(level=logging.DEBUG)
-    logging.debug("This will get logged")
 
     host_project_dir = pathlib.Path(os.getcwd())
+    output_path = pathlib.Path(output)
 
     if provider == "host":
-        lifecycle_provider = MycraftHostProvider()
+        lifecycle_provider = MycraftHostProvider(artifacts_dir=output_path)
     elif provider == "lxd":
         env_provider = LXDProvider(instance_name="mycraft-project")
         env_provider.setup()
         lifecycle_provider = MycraftExecutedProvider(
-            env_provider=env_provider, host_project_dir=host_project_dir
+            env_provider=env_provider,
+            host_artifacts_dir=output_path,
+            host_project_dir=host_project_dir,
         )
     else:
         raise RuntimeError("unknown provider")
@@ -82,7 +79,11 @@ def craft(ctx) -> int:
     ctx.obj["MYCRAFT_COMMAND"] = ["craft"]
     print(f"cli: {ctx.obj!r}")
 
-    ctx.obj["provider"].craft()
+    crafted = ctx.obj["provider"].craft()
+
+    for c in crafted:
+        click.echo(f"Crafted: {crafted}")
+
     return 0
 
 
