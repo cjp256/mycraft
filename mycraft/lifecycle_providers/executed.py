@@ -49,12 +49,10 @@ class MycraftExecutedProvider:
 
     def setup(self) -> None:
         """Run any required setup prior to executing lifecycle steps."""
-        self._setup_mycraft()
-
-        # Sync project.
         self.env_provider.executor.sync_to(
             source=self.host_project_dir, destination=self.env_project_dir
         )
+        self._setup_mycraft()
         self._run(["mkdir", "-p", self.env_artifacts_dir.as_posix()], check=True)
 
     def pull(self, *, parts: List[str]) -> None:
