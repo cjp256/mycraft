@@ -1,7 +1,7 @@
 import pathlib
 from typing import Dict, List
 
-from xcraft.providers.provider import ExecutedProvider
+from xcraft.providers.executed_provider import ExecutedProvider
 
 
 class MycraftExecutedProvider:
@@ -9,13 +9,16 @@ class MycraftExecutedProvider:
 
     def __init__(
         self,
+        *,
         env_provider: ExecutedProvider,
-        artifacts_dir: pathlib.Path = pathlib.Path("/root/mycraft-artifacts"),
-        project_dir: pathlib.Path = pathlib.Path("/root/mycraft-project"),
+        env_artifacts_dir: pathlib.Path = pathlib.Path("/root/mycraft-artifacts"),
+        env_project_dir: pathlib.Path = pathlib.Path("/root/mycraft-project"),
+        host_project_dir: pathlib.Path,
     ) -> None:
         self.env_provider = env_provider
-        self.artifacts_dir = artifacts_dir
-        self.project_dir = project_dir
+        self.env_artifacts_dir = env_artifacts_dir
+        self.env_project_dir = env_project_dir
+        self.host_project_dir = host_project_dir
 
     def _run(self, command: List[str]):
         return self.env_provider.executor.execute_run(
@@ -29,7 +32,13 @@ class MycraftExecutedProvider:
         }
 
     def _run_cwd(self) -> str:
-        return self.project_dir.as_posix()
+        return self.env_project_dir.as_posix()
+
+    def setup(self) -> None:
+        """Run any required setup prior to executing lifecycle steps."""
+        self.env_provider.executor.sync_to(
+            source=self.host_project_dir, destination=self.env_project_dir
+        )
 
     def pull(self, *, parts: List[str]) -> None:
         """Run pull phase."""
@@ -39,7 +48,7 @@ class MycraftExecutedProvider:
         """Run pull phase."""
         self._run(["mycraft", "catalog"])
 
-    def craft(self, output_dir: pathlib.Path) -> List[pathlib.Path]:
+    def craft(self) -> List[pathlib.Path]:
         """Craft project, executing lifecycle steps as required.
 
         Write output snaps to host project directory.
@@ -48,7 +57,7 @@ class MycraftExecutedProvider:
 
         :returns: Path to snap(s) created from build.
         """
-        self._run(["mycraft", "craft", "--output", self.artifacts_dir.as_posix()])
+        self._run(["mycraft", "craft", "--output", self.env_artifacts_dir.as_posix()])
         return []
 
     def clean_parts(self, *, parts: List[str]) -> None:

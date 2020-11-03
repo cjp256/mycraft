@@ -1,9 +1,17 @@
 import os
+import pathlib
 import sys
 
 import click
 
-from mycraft.lifecycle_providers.host import MycraftHostProvider
+from mycraft.lifecycle_providers.host import (
+    MycraftHostProvider,
+)
+from mycraft.lifecycle_providers.executed import (
+    MycraftExecutedProvider,
+)
+from xcraft.providers.lxd import LXDProvider
+import logging
 
 
 @click.group()
@@ -25,8 +33,25 @@ def main(ctx, debug: bool, shell: bool, provider: str, output: str) -> int:
     ctx.obj["MYCRAFT_SHELL"] = shell
     print(f"cli: {ctx.obj!r}")
 
+    logging.basicConfig(level=logging.DEBUG)
+    logging.debug("This will get logged")
+
+    host_project_dir = pathlib.Path(os.getcwd())
+
     if provider == "host":
-        ctx.obj["provider"] = MycraftHostProvider()
+        lifecycle_provider = MycraftHostProvider()
+    elif provider == "lxd":
+        env_provider = LXDProvider(instance_name="mycraft-project")
+        env_provider.setup()
+        lifecycle_provider = MycraftExecutedProvider(
+            env_provider=env_provider, host_project_dir=host_project_dir
+        )
+    else:
+        raise RuntimeError("unknown provider")
+
+    lifecycle_provider.setup()
+    ctx.obj["provider"] = lifecycle_provider
+
     return 0
 
 
