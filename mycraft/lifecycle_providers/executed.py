@@ -20,9 +20,9 @@ class MycraftExecutedProvider:
         self.env_project_dir = env_project_dir
         self.host_project_dir = host_project_dir
 
-    def _run(self, command: List[str]):
+    def _run(self, command: List[str], **kwargs):
         return self.env_provider.executor.execute_run(
-            command, env=self._run_env(), cwd=self._run_cwd()
+            command, env=self._run_env(), cwd=self._run_cwd(), **kwargs
         )
 
     def _run_env(self) -> Dict[str, str]:
@@ -34,8 +34,20 @@ class MycraftExecutedProvider:
     def _run_cwd(self) -> str:
         return self.env_project_dir.as_posix()
 
+    def _setup_mycraft(self) -> None:
+        self._run(["apt", "install", "-y", "git", "python3-pip"], check=True)
+        self._run(
+            ["pip3", "install", "git+https://github.com/cjp256/xcraft.git"], check=True
+        )
+        self._run(
+            ["pip3", "install", "git+https://github.com/cjp256/mycraft.git"], check=True
+        )
+
     def setup(self) -> None:
         """Run any required setup prior to executing lifecycle steps."""
+        self._setup_mycraft()
+
+        # Sync project.
         self.env_provider.executor.sync_to(
             source=self.host_project_dir, destination=self.env_project_dir
         )

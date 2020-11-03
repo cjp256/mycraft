@@ -83,3 +83,6 @@ class MycraftHostProvider:
         """
         if self.provider is not None:
             self.provider.clean()
+
+    def setup(self) -> None:
+        pass
