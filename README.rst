@@ -27,10 +27,20 @@ mycraft
 * Documentation: https://mycraft.readthedocs.io.
 
 
-Features
+Example
 --------
 
-* TODO
+git clone git://github.com/cjp256/xcraft
+git clone git://github.com/cjp256/mycraft
+
+python3 -m venv ~/.venv/xcraft
+. ~/.venv/xcraft/bin/activate
+
+pip install -e xcraft
+pip install -e mycraft
+
+mycraft --provider=host craft
+mycraft --provider=lxd craft
 
 Credits
 -------
