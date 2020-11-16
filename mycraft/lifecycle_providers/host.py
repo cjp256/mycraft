@@ -43,7 +43,7 @@ class MycraftHostProvider:
             filename=str(self.work_dir / "craft.jpg"),
         )
 
-    def catalog(self) -> None:
+    def build(self, *, parts: List[str]) -> None:
         catalog = self.work_dir / "catalog.yaml"
         catalog.write_text("icon=craft.jpg")
 
@@ -52,7 +52,7 @@ class MycraftHostProvider:
         :returns: Path to snap(s) created from build.
         """
         self.pull(parts=list())
-        self.catalog()
+        self.build(parts=list())
 
         out = self.artifacts_dir / "mycraft_0.1.zip"
         shutil.make_archive(str(out), "zip", self.work_dir)

@@ -55,13 +55,13 @@ class MycraftExecutedProvider:
         self._setup_mycraft()
         self._run(["mkdir", "-p", self.env_artifacts_dir.as_posix()], check=True)
 
+    def build(self, *, parts: List[str]) -> None:
+        """Run build phase."""
+        self._run(["mycraft", "build", *parts])
+
     def pull(self, *, parts: List[str]) -> None:
         """Run pull phase."""
         self._run(["mycraft", "pull", *parts])
-
-    def catalog(self) -> None:
-        """Run pull phase."""
-        self._run(["mycraft", "catalog"])
 
     def craft(self) -> List[pathlib.Path]:
         """Craft project, executing lifecycle steps as required.

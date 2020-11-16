@@ -47,10 +47,11 @@ def main(ctx, debug: bool, shell: bool, provider: str, output: str) -> int:
     return 0
 
 
-@main.command("catalog")
+@main.command("build")
+@click.argument("parts", nargs=-1, metavar="<part>...", required=False)
 @click.pass_context
-def catalog(ctx) -> int:
-    ctx.obj["provider"].catalog()
+def build(ctx, parts) -> int:
+    ctx.obj["provider"].build(parts=parts)
     return 0
 
 
@@ -68,7 +69,7 @@ def craft(ctx) -> int:
     crafted = ctx.obj["provider"].craft()
 
     for c in crafted:
-        click.echo(f"Crafted: {crafted}")
+        click.echo(f"Crafted: {c!s}")
 
     return 0
 
