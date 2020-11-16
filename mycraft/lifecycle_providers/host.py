@@ -20,20 +20,6 @@ class MycraftHostProvider:
         self.project_dir = project_dir
         self.work_dir = project_dir / "work"
 
-    def _run(self, command: List[str]):
-        return self.provider.executor.execute_run(
-            command, env=self._run_env(), cwd=self._run_cwd()
-        )
-
-    def _run_env(self) -> Dict[str, str]:
-        return {
-            "MYCRAFT_BUILD_ENVIRONMENT": "host",
-            "PATH": "/snap/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-        }
-
-    def _run_cwd(self) -> str:
-        return self.project_dir.as_posix()
-
     def pull(self, *, parts: List[str]) -> None:
         """Run pull phase."""
         self.work_dir.mkdir(parents=True, exist_ok=True)

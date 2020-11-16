@@ -5,7 +5,7 @@ from xcraft.providers.executed_provider import ExecutedProvider
 
 
 class MycraftExecutedProvider:
-    """Manages the lifecycle of a project."""
+    """Manages the lifecycle of a project for executed providers."""
 
     def __init__(
         self,
