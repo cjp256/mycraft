@@ -15,6 +15,7 @@ class MycraftExecutedProvider:
         env_project_dir: pathlib.Path = pathlib.Path("/root/mycraft-project"),
         host_artifacts_dir: pathlib.Path,
         host_project_dir: pathlib.Path,
+        run_environment: Dict[str, str] = None,
     ) -> None:
         self.env_provider = env_provider
         self.env_artifacts_dir = env_artifacts_dir
@@ -22,19 +23,31 @@ class MycraftExecutedProvider:
         self.host_artifacts_dir = host_artifacts_dir
         self.host_project_dir = host_project_dir
 
+        if run_environment is not None:
+            self.run_environment = run_environment.copy()
+        else:
+            self.run_environment = {
+                "MYCRAFT_BUILD_ENVIRONMENT": "host",
+                "PATH": "/snap/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+            }
+
     def _run(self, command: List[str], **kwargs):
+        if "env" in kwargs:
+            env = kwargs.pop("env")
+        else:
+            env = self.run_environment
+
+        if "cwd" in kwargs:
+            cwd = kwargs.pop("cwd")
+        else:
+            cwd = self.env_project_dir.as_posix()
+
         return self.env_provider.executor.execute_run(
-            command, env=self._run_env(), cwd=self._run_cwd(), **kwargs
+            command,
+            env=env,
+            cwd=cwd,
+            **kwargs,
         )
-
-    def _run_env(self) -> Dict[str, str]:
-        return {
-            "MYCRAFT_BUILD_ENVIRONMENT": "host",
-            "PATH": "/snap/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-        }
-
-    def _run_cwd(self) -> str:
-        return self.env_project_dir.as_posix()
 
     def _setup_mycraft(self) -> None:
         self._run(["apt", "install", "-y", "git", "python3-pip"], check=True)
